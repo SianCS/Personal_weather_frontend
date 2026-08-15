@@ -49,16 +49,16 @@ function GuestPage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         fetchWeather(() =>
-          searchByLagLon(position.coords.latitude, position.coords.longitude)
+          searchByLagLon(position.coords.latitude, position.coords.longitude),
         );
       },
       () => {
         // หากเข้าถึงตำแหน่งไม่ได้ ให้แสดงข้อผิดพลาด หรือใช้ค่าเริ่มต้น
         setError(
-          "ไม่สามารถเข้าถึงตำแหน่งปัจจุบันได้ กำลังแสดงข้อมูลของกรุงเทพฯ"
+          "ไม่สามารถเข้าถึงตำแหน่งปัจจุบันได้ กำลังแสดงข้อมูลของกรุงเทพฯ",
         );
         fetchWeather(() => searchByCityName("Bangkok"));
-      }
+      },
     );
   };
 
@@ -98,42 +98,44 @@ function GuestPage() {
               </dialog>
             </div>
             {/* ปรับปรุงฟอร์มให้มีปุ่มค้นหาและปุ่มตำแหน่งปัจจุบัน */}
-            <form
-              onSubmit={handleSearch}
-              className="relative flex items-center"
-            >
-              <input
-                type="text"
-                value={cityInput}
-                onChange={(e) => setCityInput(e.target.value)}
-                placeholder="ค้นหาชื่อเมือง..."
-                className="w-full px-5 py-3 pl-12 text-lg rounded-full shadow-lg border-2 bg-white/50"
-              />
-              <button
-                type="button"
-                onClick={handleGetCurrentLocation}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
-                title="ใช้ตำแหน่งปัจจุบัน"
+            <div className="flex items-center gap-3">
+              <form
+                onSubmit={handleSearch}
+                className="relative flex items-center flex-1"
               >
-                <LocationIcon />
-              </button>
+                <input
+                  type="text"
+                  value={cityInput}
+                  onChange={(e) => setCityInput(e.target.value)}
+                  placeholder="ค้นหาชื่อเมือง..."
+                  className="w-full px-5 py-3 pl-12 text-lg rounded-full shadow-lg border-2 bg-white/50"
+                />
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
+                  title="ใช้ตำแหน่งปัจจุบัน"
+                >
+                  <LocationIcon />
+                </button>
+                <button
+                  type="submit"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
+                  title="ค้นหา"
+                >
+                  <SearchIcon />
+                </button>
+              </form>
+
               <button
-                type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
-                title="ค้นหา"
+                className="group transition flex-shrink-0"
+                onClick={handleAuthRedirect}
+                title="เพิ่มรายการโปรด"
               >
-                <SearchIcon />
+                <AddFavoriteIcon className="w-10 group-hover:fill-red-600 transition" />
               </button>
-            </form>
-            
-                <button className="group transition" onClick={handleAuthRedirect}>
-              {" "}
-              {/* 1. เพิ่ม group ที่นี่ */}
-              <AddFavoriteIcon className="w-10 absolute right-120 bottom-182 group-hover:fill-red-600 transition " />{" "}
-              {/* 2. เพิ่ม group-hover ที่นี่ */}
-            </button>
-            
-            
+            </div>
+
             <div className="flex-grow flex items-center justify-center min-h-[20rem]">
               {loading && <LoadingUi />}
               {error && <ErrorUi message={error} />}
@@ -146,7 +148,7 @@ function GuestPage() {
                     <p className="text-sm text-gray-700 mt-1">
                       เวลาท้องถิ่น:{" "}
                       {new Date(
-                        (weather.dt + weather.timezone) * 1000
+                        (weather.dt + weather.timezone) * 1000,
                       ).toLocaleTimeString("th-TH", {
                         timeZone: "UTC",
                         hour: "2-digit",
@@ -190,7 +192,7 @@ function GuestPage() {
                           โอกาสเกิดฝน
                         </p>
                         <p className="text-lg font-bold">
-                         💧 {weather.chanceOfRain}%
+                          💧 {weather.chanceOfRain}%
                         </p>
                       </div>
                     )}
