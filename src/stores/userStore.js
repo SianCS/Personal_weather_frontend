@@ -4,7 +4,7 @@ import { loginUser } from "../api";
 
 const useUserStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: "",
       login: async (credentials) => {

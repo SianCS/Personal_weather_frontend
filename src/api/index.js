@@ -1,8 +1,9 @@
 import axios from "axios";
-// import useUserStore from "../stores/userStore";
+import { toast } from "react-toastify";
+import useUserStore from "../stores/userStore";
 
 // URL หลักของ Backend API ของคุณ
-const API_BASE_URL = "http://localhost:8555/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8555/api";
 
 /**
  * API client สำหรับเรียก endpoint ที่ไม่ต้องยืนยันตัวตน
@@ -26,7 +27,7 @@ privateApi.interceptors.request.use(
   (config) => {
     try {
       // 1. ดึง state ทั้งหมดจาก localStorage (Zustand จะเก็บไว้ใน key ที่เราตั้งชื่อ)
-      const userStateString = localStorage.getItem("userState"); // ◀️ ตรวจสอบว่า 'userState' คือชื่อที่คุณใช้ใน persist middleware
+      const userStateString = localStorage.getItem("userState");
 
       if (userStateString) {
         // 2. แปลง JSON string กลับเป็น object
@@ -53,10 +54,21 @@ privateApi.interceptors.request.use(
   },
 );
 
-// --- คุณสามารถเพิ่ม Helper Functions สำหรับเรียก API ที่นี่ได้ในอนาคต ---
-// ตัวอย่าง:
-// export const loginUser = (credentials) => publicApi.post('/auth/login', credentials);
-// export const getMyFavorites = () => privateApi.get('/favorites');
+// ถ้า Token หมดอายุ/ไม่ถูกต้อง (401) ให้ logout อัตโนมัติ แล้วกลับไปหน้า Guest
+privateApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useUserStore.getState().logout();
+      toast.error("เซสชันหมดอายุ กรุณา Login ใหม่", { toastId: "session-expired" });
+    }
+    return Promise.reject(error);
+  },
+);
+
+// ดึงข้อความ error จาก response ของ Backend (Backend ส่งมาในรูป { message })
+export const getErrorMessage = (err, fallback) =>
+  err.response?.data?.message || fallback || err.message;
 
 export const searchByCityName = (cityName) => {
   return publicApi.get("/weather", {

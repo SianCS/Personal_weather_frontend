@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "../utils/validator";
 import { toast } from "react-toastify";
 import Register from "./Register";
+import { getErrorMessage } from "../api";
 
 function Login() {
   const [resetForm, setResetForm] = useState(false);
@@ -20,28 +21,24 @@ function Login() {
   });
 
   const hdlClose = () => {
-    console.log("dialog close...");
     setResetForm((prv) => !prv);
     reset()
   };
 
   const hdlLogin = async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       const resp = await login(data);
       toast.success(resp.data.message, {
         position: "top-left",
       });
-      // localStorage.setItem('user',JSON.stringify( resp.data.user))
     } catch (err) {
-      const errMsg = err.response?.data?.error || err.message;
-      toast(errMsg);
+      toast.error(getErrorMessage(err));
     }
   };
   return (
     <div className="flex justify-center">
-      <form onSubmit={handleSubmit(hdlLogin)}>
-        <fieldset className="fieldset bg-white border-base-300 rounded-box w-xs border p-4 ">
+      <form onSubmit={handleSubmit(hdlLogin)} className="w-full max-w-xs">
+        <fieldset className="fieldset bg-white border-base-300 rounded-box w-full border p-4 ">
           <legend className="fieldset-legend text-center text-[20px]">
             Login
           </legend>

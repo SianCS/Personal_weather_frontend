@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useUserStore from "../stores/userStore";
 import { toast } from "react-toastify";
 import { FavoritesList } from "../components/FavoritesList";
 import {
+  getErrorMessage,
   privateApi,
-  // publicApi,
   searchByCityName,
   searchByLagLon,
 } from "../api";
@@ -29,6 +29,7 @@ function UserDashboard() {
   const [clickedPosition, setClickedPosition] = useState(null);
   const [renameFavoriteData, setRenameFavoriteData] = useState(null);
   const [addFavoriteData, setAddFavoriteData] = useState(null);
+  const weatherColumnRef = useRef(null);
 
 
  const fetchWeather = useCallback(async (apiCall, overrideDisplayName = null) => {
@@ -46,11 +47,9 @@ function UserDashboard() {
         weatherData.city = overrideDisplayName;
       }
       
-      console.log("Weather data received:", weatherData);
       setWeather(weatherData);
     } catch (e) {
-      const errorMessage = e.response?.data?.message || e.response?.data?.error || e.message;
-      setError(errorMessage);
+      setError(getErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -97,14 +96,17 @@ function UserDashboard() {
     }
   };
 
-  // ✨ HIGHLIGHT: 1. ปรับปรุงฟังก์ชัน handleFavoriteToggle
  const handleFavoriteToggle = async (currentWeather, isFavorited) => {
       if (isFavorited) {
           const favToRemove = favorites.find(f => f.cityId === currentWeather.cityId);
           if (favToRemove) {
-              await privateApi.delete(`/favorites/${favToRemove.id}`);
-              fetchFavorites();
-              toast.success(`ลบ ${currentWeather.city} ออกจากรายการโปรดแล้ว`);
+              try {
+                  await privateApi.delete(`/favorites/${favToRemove.id}`);
+                  fetchFavorites();
+                  toast.success(`ลบ ${currentWeather.city} ออกจากรายการโปรดแล้ว`);
+              } catch (err) {
+                  toast.error(getErrorMessage(err, "ไม่สามารถลบเมืองโปรดได้"));
+              }
           }
       } else {
           if (!currentWeather || typeof currentWeather.cityId !== 'number') {
@@ -124,7 +126,7 @@ function UserDashboard() {
         fetchFavorites();
         toast.success(`เพิ่มเป็นรายการโปรดแล้ว`);
     } catch (err) {
-        toast.error(err.response?.data?.error || "ไม่สามารถเพิ่มเมืองโปรดได้");
+        toast.error(getErrorMessage(err, "ไม่สามารถเพิ่มเมืองโปรดได้"));
     }
   };
 
@@ -133,14 +135,17 @@ function UserDashboard() {
     setClickedPosition([lat, lng]);
     setCityInput(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     fetchWeather(() => searchByLagLon(lat, lng));
+
+    // บนมือถือแผนที่อยู่ล่างสุด ให้เลื่อนขึ้นไปที่ผลลัพธ์อากาศ
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      weatherColumnRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
   
-  // ✨ HIGHLIGHT: 4. เปลี่ยน handleFavoriteRename ให้เปิด Modal
   const handleFavoriteRename = (favId, currentName) => {
     setRenameFavoriteData({ id: favId, currentName: currentName });
   };
 
-  // ✨ HIGHLIGHT: 5. สร้างฟังก์ชันสำหรับจัดการการ submit จาก Modal แก้ไขชื่อ
   const handleConfirmRename = async (favId, newName) => {
     if (newName !== null && newName.trim() !== "") {
         try {
@@ -148,12 +153,11 @@ function UserDashboard() {
             toast.success("แก้ไขชื่อสำเร็จ!");
             fetchFavorites();
         } catch (err) {
-            toast.error(err.response?.data?.error || "ไม่สามารถแก้ไขชื่อได้");
+            toast.error(getErrorMessage(err, "ไม่สามารถแก้ไขชื่อได้"));
         }
     }
   };
 
-   // ✨ HIGHLIGHT: 2. ปรับปรุง handleSelectFavorite ให้ส่งชื่อที่ต้องการแสดงผลไปด้วย
   const handleSelectFavorite = (favorite) => {
     // ดึงข้อมูลอากาศโดยใช้พิกัดที่แม่นยำของเมืองโปรด
     // และส่ง "ชื่อเล่น" (หรือชื่อจริง) ไปเป็น overrideDisplayName
@@ -167,9 +171,6 @@ function UserDashboard() {
 
   const isFavorited = weather ? favorites.some(fav => fav.cityId === weather.cityId) : false;
 
-   if (weather) {
-    console.log("Passing cityId to FiveDayForecast:", weather.cityId);
-  }
 
 
   return (
@@ -181,7 +182,6 @@ function UserDashboard() {
       }}
     >
       <div className="min-h-screen w-full bg-black/10 backdrop-blur-sm">
-        {/* ✨ HIGHLIGHT: เพิ่ม Navbar สำหรับแสดงข้อมูลผู้ใช้และปุ่ม Logout */}
         {/* ======================================================= */}
         <div className="navbar bg-transparent px-4 md:px-8 pt-4">
             <div className="flex-1">
@@ -201,7 +201,6 @@ function UserDashboard() {
 
         <div className="container mx-auto p-4">
 
-          {/* ✨ HIGHLIGHT: 6. เพิ่ม Modal component เข้าไปใน JSX */}
       {addFavoriteData && (
         <AddFavoriteModal
             cityData={addFavoriteData}
@@ -218,7 +217,7 @@ function UserDashboard() {
       )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Left Column */}
-            <div className="md:col-span-1 flex flex-col gap-6">
+            <div ref={weatherColumnRef} className="md:col-span-1 flex flex-col gap-6 scroll-mt-4">
               <form
                 onSubmit={handleSearch}
                 className="relative flex items-center"

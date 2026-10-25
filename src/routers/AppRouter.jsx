@@ -22,8 +22,6 @@ const userRouter = createBrowserRouter([
 
 function AppRouter() {
 
-  // const user = "sian"
-  // const user = false
   const user = useUserStore(state => state.user)
 
   const finalRouter = user ? userRouter : guestRouter

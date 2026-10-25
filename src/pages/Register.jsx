@@ -14,25 +14,19 @@ function Register({ resetForm }) {
 
   useEffect(() => {
     reset();
-  }, [resetForm]);
+  }, [resetForm, reset]);
 
   const onSubmit = async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
       const resp = await registerUser(data);
-      // console.log("API Response Received:", resp);
-      // console.log("Response Data:", resp.data);
       const successMsg = resp.data?.message || "Registration successful!";
       toast.success(successMsg, {
         position: "top-left",
       });
       reset()
-      // document.getElementById("register-form").close();
     } catch (err) {
-      console.log("Error Response Data:", err.response?.data);
-
       const errMsg =
-        err.response?.data?.error || err.response?.data?.message || err.message;
+        err.response?.data?.message || err.message;
       toast.error(errMsg, {
         position: "top-left",
       });
@@ -40,10 +34,10 @@ function Register({ resetForm }) {
   };
   return (
     <div className="flex justify-center">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-xs">
         <fieldset
           disabled={isSubmitting}
-          className="fieldset bg-white border-base-300 rounded-box w-xs border p-4 "
+          className="fieldset bg-white border-base-300 rounded-box w-full border p-4 "
         >
           <legend className="fieldset-legend text-center text-[20px]">
             Register

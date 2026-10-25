@@ -1,8 +1,5 @@
 import React, { useEffect } from 'react';
-// 🔽 สำหรับแผนที่ (จำเป็นต้องติดตั้ง: npm install leaflet react-leaflet)
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Tooltip } from 'react-leaflet';
-// 📝 หมายเหตุ: ในโปรเจกต์จริง คุณต้อง import CSS ของ Leaflet ในไฟล์หลัก (เช่น App.jsx)
-// import 'leaflet/dist/leaflet.css';
 
 // --- Helper Component: สำหรับอัปเดตตำแหน่งของแผนที่ ---
 const MapUpdater = ({ center }) => {
@@ -48,19 +45,17 @@ function MapDisplay({ weather, onMapClick, clickedPosition, favorites = [] }) {
                     {/* Marker ชั่วคราวสำหรับตำแหน่งที่คลิก */}
                     {clickedPosition && <Marker position={clickedPosition} />}
 
-                    {/* ✅ แสดง Marker สำหรับทุกเมืองในรายการโปรด */}
                     {favorites.map(fav => (
                         <Marker
                             key={`fav-${fav.id}`}
                             position={[fav.latitude, fav.longitude]}
                         >
-                            {/* ✨ HIGHLIGHT: เพิ่ม Tooltip เพื่อแสดงชื่อบนแผนที่ */}
                             <Tooltip
-                                permanent // 👈 ทำให้แสดงผลตลอดเวลา
-                                direction="top" // 👈 แสดงชื่อเหนือ Marker
-                                offset={[0, -15]} // 👈 ปรับตำแหน่งเล็กน้อย
+                                permanent
+                                direction="top"
+                                offset={[0, -15]}
                                 opacity={1}
-                                className="leaflet-tooltip-custom" // 👈 เพิ่ม class สำหรับ styling (optional)
+                                className="leaflet-tooltip-custom"
                             >
                                 {fav.favoriteName || fav.locationName}
                             </Tooltip>
