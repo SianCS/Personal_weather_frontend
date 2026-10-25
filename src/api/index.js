@@ -66,6 +66,49 @@ privateApi.interceptors.response.use(
   },
 );
 
+// Backend อยู่บน Render แผนฟรีซึ่งจะหลับเมื่อไม่มีคนใช้ request แรกอาจรอ 30–60 วินาที
+// ถ้ามี request ค้างนานเกิน SLOW_REQUEST_MS ให้บอกผู้ใช้ จะได้ไม่คิดว่าเว็บพัง
+const SLOW_REQUEST_MS = 5000;
+const WAKE_TOAST_ID = "server-waking";
+let pendingRequests = 0;
+let wakeTimer = null;
+
+const trackRequestStart = (config) => {
+  pendingRequests += 1;
+  if (!wakeTimer) {
+    wakeTimer = setTimeout(() => {
+      toast.info("กำลังปลุกเซิร์ฟเวอร์ (free tier) อาจใช้เวลาสักครู่...", {
+        toastId: WAKE_TOAST_ID,
+        autoClose: false,
+      });
+    }, SLOW_REQUEST_MS);
+  }
+  return config;
+};
+
+const trackRequestEnd = () => {
+  pendingRequests = Math.max(0, pendingRequests - 1);
+  if (pendingRequests === 0) {
+    clearTimeout(wakeTimer);
+    wakeTimer = null;
+    toast.dismiss(WAKE_TOAST_ID);
+  }
+};
+
+for (const api of [publicApi, privateApi]) {
+  api.interceptors.request.use(trackRequestStart);
+  api.interceptors.response.use(
+    (response) => {
+      trackRequestEnd();
+      return response;
+    },
+    (error) => {
+      trackRequestEnd();
+      return Promise.reject(error);
+    },
+  );
+}
+
 // ดึงข้อความ error จาก response ของ Backend (Backend ส่งมาในรูป { message })
 export const getErrorMessage = (err, fallback) =>
   err.response?.data?.message || fallback || err.message;
