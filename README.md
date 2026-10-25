@@ -1,12 +1,60 @@
-# React + Vite
+# WeatherVista — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A weather dashboard built with React. Search any city, click anywhere on the map, save favorite locations, and see a 5-day forecast — all in the city's own local time.
 
-Currently, two official plugins are available:
+> Backend (Express + Prisma + MySQL): [SianCS/Personal_weather_backed](https://github.com/SianCS/Personal_weather_backed)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![Dashboard](docs/dashboard.png)
 
-## Expanding the ESLint configuration
+<details>
+<summary>Guest page</summary>
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+![Guest page](docs/guest.png)
+
+</details>
+
+## Features
+
+- **Guest mode** — search a city or use your current location without signing up
+- **Interactive map** (Leaflet + OpenStreetMap) — click any point to get the weather there
+- **Favorites** — save, rename and remove locations; favorites are shown as labeled markers on the map
+- **5-day forecast** — 3-hour data grouped into days by the city's local time, showing daily high/low, the midday condition and the highest chance of rain
+- **Local time vs. data time** — shows the city's live clock separately from when the weather data was observed, so cached data never looks "current" when it isn't
+- **Auth** — register/login with form validation; expired tokens log the user out automatically
+
+## Tech Stack
+
+| Area | Tools |
+|---|---|
+| UI | React 19, Vite, Tailwind CSS 4, daisyUI |
+| Routing | React Router 7 (separate routers for guests and signed-in users) |
+| State | Zustand (persisted to `localStorage`) |
+| Forms | React Hook Form + Yup |
+| HTTP | Axios with request/response interceptors |
+| Map | React Leaflet |
+
+## Getting Started
+
+Requires Node.js 18+ and the [backend](https://github.com/SianCS/Personal_weather_backed) running.
+
+```bash
+npm install
+cp .env.example .env.local   # set VITE_API_URL if the API is not on localhost:8555
+npm run dev                  # http://localhost:5173
+```
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:8555/api` | Base URL of the backend API |
+
+## Project Structure
+
+```
+src/
+├── api/          # Axios clients (public / authenticated) and API helpers
+├── components/   # WeatherDisplay, FiveDayForecast, MapDisplay, CityTime, modals…
+├── pages/        # GuestPage, UserDashboard, Login, Register
+├── routers/      # Guest vs. user router
+├── stores/       # Zustand user store
+└── utils/        # Yup validation schemas
+```
