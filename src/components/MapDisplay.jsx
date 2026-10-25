@@ -1,5 +1,17 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Tooltip } from 'react-leaflet';
+import L from 'leaflet';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Leaflet หา path รูปหมุดจาก CSS เอง ซึ่งพังหลัง Vite build (ไฟล์ถูกย้าย/เปลี่ยนชื่อ) จึงต้องกำหนด URL ให้ตรงๆ
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconUrl: markerIcon,
+    iconRetinaUrl: markerIcon2x,
+    shadowUrl: markerShadow,
+});
 
 // --- Helper Component: สำหรับอัปเดตตำแหน่งของแผนที่ ---
 const MapUpdater = ({ center }) => {
