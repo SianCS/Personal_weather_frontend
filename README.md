@@ -2,7 +2,10 @@
 
 A weather dashboard built with React. Search any city, click anywhere on the map, save favorite locations, and see a 5-day forecast — all in the city's own local time.
 
-> Backend (Express + Prisma + MySQL): [SianCS/Personal_weather_backed](https://github.com/SianCS/Personal_weather_backed)
+**Live demo:** https://weathervista-sage.vercel.app
+> The API runs on Render's free tier and sleeps when idle, so the first request may take up to a minute (the app shows a notice while it wakes up).
+
+> Backend (Express + Prisma + MySQL): [SianCS/Personal_weather_backend](https://github.com/SianCS/Personal_weather_backend)
 
 ![Dashboard](docs/dashboard.png)
 
@@ -35,7 +38,7 @@ A weather dashboard built with React. Search any city, click anywhere on the map
 
 ## Getting Started
 
-Requires Node.js 18+ and the [backend](https://github.com/SianCS/Personal_weather_backed) running.
+Requires Node.js 18+ and the [backend](https://github.com/SianCS/Personal_weather_backend) running.
 
 ```bash
 npm install
